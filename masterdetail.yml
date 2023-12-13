@@ -1,0 +1,69 @@
+Page:
+  
+
+  interfaces:
+    User:
+      id: number
+      firstName: string
+      lastName: string
+
+    TDetail:
+      u: User
+      selFn: (u: User) => void
+
+    TMaster:
+      data: User[]
+      selFn: (u: User) => void
+
+  components:
+    Detail:
+      props: TDetail
+      render:
+        - type: "tr"
+          key: "u.id"
+          onClick: "() => selFn(u)"
+          children:
+            - type: "td"
+              children: "u?.id"
+            - type: "td"
+              children: "u?.firstName"
+            - type: "td"
+              children: "u?.lastName"
+
+    Master:
+      props: TMaster
+      render:
+        - type: "div"
+          children:
+            - type: "table"
+              children:
+                - type: "thead"
+                  children:
+                    - type: "tr"
+                      children:
+                        - type: "th"
+                          children: "#"
+                        - type: "th"
+                          children: "firstName"
+                        - type: "th"
+                          children: "lastName"
+                - type: "tbody"
+                  children:
+                    - type: "expression"
+                      value: "data.map(u => <Detail u={u} selFn={selFn} />)"
+
+  defaultExport:
+    type: "function"
+    name: "Page"
+    props: {}
+    render:
+      - type: "main"
+        children:
+          - type: "expression"
+            value: "loading ? <p>loading...</p> :"
+          - type: "fragment"
+            children:
+              - type: "Master"
+                props: "{ data: users, selFn: setSeluser }"
+              - type: "Detail"
+                props: "{user: seluser}"
