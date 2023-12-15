@@ -47,28 +47,17 @@ export const UserTable = ({data, selFn} : TUserTable) =>{
     )
 }
 
-export function UserForm({user}: {user: User | null}){
-    console.log("render ", user);
-    
-    return (
-        <form 
-        className="max-w-md "
-        >
-            <FormItem value={user?.firstName} attr="firstName" label="FirstName" />
-            <FormItem value={user?.lastName} attr="lastName" label="LastName" />
-        </form>
-    )
-}
 
-interface UserForm2Props {
+interface UserFormProps {
     initialUser:User;
     onSubmit: (updatedUser: User) => void;
   }
   
- export const UserForm2 = ({ initialUser, onSubmit }:UserForm2Props) => {
+ export const UserForm = ({ initialUser, onSubmit }:UserFormProps) => {
     const [user, setUser] = useState(initialUser);
     const [isDirty, setIsDirty] = useState(false);
-  
+    
+    console.log("userform", initialUser, user )
     useEffect(() => {
       setUser(initialUser);
       setIsDirty(false);

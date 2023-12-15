@@ -1,51 +1,52 @@
 "use client"
-import { Debug } from '@/components/debug'
-import { fetchUsers, putUsers } from '@/lib/api'
-import { User,Address } from '@/lib/types'
-import { MouseEvent, useEffect, useState } from 'react'
-import { UserForm, UserForm2, UserTable } from './components/master-detail'
+import { fetchUsers, postUsers, putUsers } from '@/lib/api'
+import { User } from '@/lib/types'
+import { useState } from 'react'
+import {  UserForm, UserTable } from './components/master-detail'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 
 
 export default function Page() {
-    const [users,setUsers]= useState<User[] >( [] )
-    const [loading,setLoading] = useState(true)
     const [seluser, setSeluser] = useState<User | null>(null) 
 
-    useEffect(() => {
-        setLoading(true)
-        fetchUsers()
-            .then(usrs =>setUsers(usrs))
-            .finally(() => setLoading(false))
-    },[])
+    const query = useQuery( {queryKey: ['users'], queryFn: fetchUsers} )
 
-    console.log("user Page render");
+    const mutation = useMutation({
+        mutationFn: putUsers,
+        onSuccess : () =>{
+             query.refetch()
+        } 
+    })
+
+    console.log("user Page render", seluser);
 
     function submit(u:User) {
-        putUsers(u)
-            .then(console.log )
-            .then(() =>{
-                
-                setLoading(true)
-                fetchUsers()
-                    .then(usrs =>setUsers(usrs))
-                    .finally(() => setLoading(false))
-            }
-            )
+        //post
+       if (u.id == null) {
+            postUsers(u)
+            query.refetch()
+       }
+       //put
+       if (u.id != null) {
+            mutation.mutate(u)
+       }
     }
   return (
     <main className="flex min-h-screen flex-col  space-y-6  p-24">
         <h1>User</h1>
+        <button onClick={()=> setSeluser({} as User)}>Create New</button>
 
-        {/* {Debug(users)} */}
-        {loading? <p>loading...</p> : 
-        // react fragment
+        { query.isLoading && <p>loading...</p> }
+
+        { query.isFetched &&
         <>
-            <UserTable data={users} selFn={setSeluser} />
-            {seluser ? <UserForm2 initialUser={seluser} onSubmit={submit}/>: <></>}
+            <UserTable data={query.data} selFn={setSeluser} />
+            {seluser ? <UserForm initialUser={seluser} onSubmit={submit}/>: <></>}
         </>
+        }
         
-        }  
+         
 
     </main>
   )
