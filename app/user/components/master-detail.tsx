@@ -1,5 +1,6 @@
 import { FormItem } from "@/components/forms"
 import { User } from "@/lib/types"
+import { useEffect, useState } from "react"
 
 interface TUserRow{
     u:User,
@@ -8,7 +9,6 @@ interface TUserRow{
 
 export const UserRow = ({u,selFn} : TUserRow) => (
     <tr 
-    key={u.id} 
     className='border-b'
     onClick={() => selFn(u)}
     >
@@ -40,7 +40,7 @@ export const UserTable = ({data, selFn} : TUserTable) =>{
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map(u => <UserRow u={u} selFn={selFn} />)}
+                    {data.map(u => <UserRow key={u.id} u={u} selFn={selFn} />)}
                 </tbody>
             </table>
         </div>
@@ -48,6 +48,8 @@ export const UserTable = ({data, selFn} : TUserTable) =>{
 }
 
 export function UserForm({user}: {user: User | null}){
+    console.log("render ", user);
+    
     return (
         <form 
         className="max-w-md "
@@ -58,4 +60,42 @@ export function UserForm({user}: {user: User | null}){
     )
 }
 
+interface UserForm2Props {
+    initialUser:User;
+    onSubmit: (updatedUser: User) => void;
+  }
+  
+ export const UserForm2 = ({ initialUser, onSubmit }:UserForm2Props) => {
+    const [user, setUser] = useState(initialUser);
+    const [isDirty, setIsDirty] = useState(false);
+  
+    useEffect(() => {
+      setUser(initialUser);
+      setIsDirty(false);
+    }, [initialUser]);
+  
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setUser((prevUser) => ({ ...prevUser, [name]: value }));
+      setIsDirty(true);
+    };
+  
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (isDirty) {
+        onSubmit(user);
+        setIsDirty(false);
+      }
+    };
+  
+    return (
+      <form onSubmit={handleSubmit}>
+
+        <FormItem value={user.firstName} attr="firstName" label="FirstName" onChange={handleChange}/>
+        <FormItem value={user.lastName} attr="lastName" label="LastName" onChange={handleChange}/>
+        <br />
+        <button type="submit">Submit</button>
+      </form>
+    );
+  };
 
